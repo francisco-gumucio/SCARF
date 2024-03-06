@@ -3,6 +3,8 @@ import os
 from datasets._heterogeneous import HeterogeneousSCM
 from utils.distributions import *
 import pandas as pd
+from torch_geometric.data import DataLoader
+from torch_geometric.utils import degree
 
 class ToySCM(HeterogeneousSCM):
 
@@ -58,3 +60,27 @@ class ToySCM(HeterogeneousSCM):
 
     def node_is_image(self):
         return [False for _ in range(len(self.nodes_list))]
+    
+    def get_random_train_sampler(self):
+        self.train_dataset.set_transform(self._default_transforms())
+
+        def tmp_fn(num_samples):
+            dataloader = DataLoader(self.train_dataset, batch_size=num_samples, shuffle=True)
+            return next(iter(dataloader))
+
+        return tmp_fn
+
+    def get_deg(self, indegree=True, bincount=False):
+        d_list = []
+        idx = 1 if indegree else 0
+        for data in self.train_dataset:
+            d = degree(data.edge_index[idx], num_nodes=data.num_nodes, dtype=torch.long)
+            d_list.append(d)
+
+        d = torch.cat(d_list)
+        if bincount:
+            deg = torch.bincount(d, minlength=d.numel())
+        else:
+            deg = d
+
+        return deg.float()
