@@ -5,6 +5,7 @@ from utils.distributions import *
 import pandas as pd
 from torch_geometric.data import DataLoader
 from torch_geometric.utils import degree
+import torch
 
 class ToySCM(HeterogeneousSCM):
 
