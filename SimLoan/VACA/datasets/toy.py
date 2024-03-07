@@ -22,6 +22,13 @@ class ToySCM(HeterogeneousSCM):
         self.split = split
         self.num_samples_tr = num_samples_tr
 
+        if self.split == 'train':
+            self.train_dataset = X
+        elif self.split == 'valid':
+            self.valid_dataset = X
+        else:
+            self.test_dataset = X
+
         super().__init__(root_dir=root_dir,
                          transform=transform,
                          nodes_to_intervene=['x1'],
