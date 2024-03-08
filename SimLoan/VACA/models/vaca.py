@@ -89,9 +89,8 @@ class VACA(pl.LightningModule):
                                      K=K
                                      )
         else:
-            from models.vaca.vaca_module import VACAModule
+            from models.vaca_module import VACAModule
             x_dim = likelihood_x.domain_size
-
             self.model = VACAModule(x_dim=x_dim,
                                     h_dim_list_dec=h_dim_list_dec,  # Hidden layers in the generative network
                                     h_dim_list_enc=h_dim_list_enc,  # Hidden layers in the inference network
