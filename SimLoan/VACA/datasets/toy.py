@@ -19,6 +19,7 @@ class ToySCM(HeterogeneousSCM):
                  ):
         assert split in ['train', 'valid', 'test']
 
+        self.X = X
         self.name = 'toy'
         self.split = split
         self.num_samples_tr = num_samples_tr
