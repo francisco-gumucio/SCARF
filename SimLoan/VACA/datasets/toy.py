@@ -11,27 +11,18 @@ import torch
 class ToySCM(HeterogeneousSCM):
 
     def __init__(self, root_dir,
-                 X, 
                  split: str = 'train',
                  num_samples_tr: int = 630,
                  lambda_: float = 0.05,
                  transform=None,
                  ):
+        
         assert split in ['train', 'valid', 'test']
 
-        self.X = X
+        self.df = pd.read_csv('pairs.csv', header=0, index_col=0)
         self.name = 'toy'
         self.split = split
         self.num_samples_tr = num_samples_tr
-
-        if self.split == 'train':
-            self.train_dataset = X
-        elif self.split == 'valid':
-            self.valid_dataset = X
-        else:
-            self.test_dataset = X
-
-    
 
         super().__init__(root_dir=root_dir,
                          transform=transform,
@@ -78,7 +69,18 @@ class ToySCM(HeterogeneousSCM):
             edge_num += len(self.adj_edges[key])
 
         return edge_num + self.num_nodes
-    
+
+    def _create_data(self):
+        X_vals = self.df.values
+        if self.split == 'train':
+            self.X = X_vals[:int(self.num_samples_tr*0.7)]
+        elif self.split == 'valid':
+            self.X = X_vals[int(self.num_samples_tr*0.7):int(self.num_samples_tr*0.8)]
+        elif self.split == 'test':
+            self.X = X_vals[int(self.num_samples_tr*0.8):self.num_samples_tr]
+        self.U = np.zeros([self.X.shape[0], 1])
+
+
     def set_transform(self, transform):
         self.transform = transform
 

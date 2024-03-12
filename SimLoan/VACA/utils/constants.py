@@ -47,6 +47,7 @@ class Cte:
     CHAIN = 'chain'
     GERMAN = 'german'
     DONORS = 'donors'
+    TOY = 'toy'
 
     ADULT_AB_LIST = ['adult_ab_age', 'adult_ab_edu', 'adult_ab_hours',
                   'adult_ab_a_e', 'adult_ab_a_h', 'adult_ab_e_h',
