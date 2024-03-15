@@ -4,7 +4,7 @@ import os
 import pytorch_lightning as pl
 import torch
 from sklearn import preprocessing
-from torch_geometric.data import DataLoader
+from torch_geometric.loader import DataLoader
 from torch_geometric.utils import degree
 from torchvision import transforms as transform_lib
 
@@ -309,6 +309,7 @@ class HeterogeneousSCMDataModule(pl.LightningDataModule):
         else:
             self.scaler = preprocessing.FunctionTransformer(func=lambda x: x,
                                                             inverse_func=lambda x: x)
+            
 
     def train_dataloader(self):
         self.train_dataset.set_transform(self._default_transforms())

@@ -191,7 +191,7 @@ class VACA(pl.LightningModule):
     def on_train_epoch_start(self) -> None:
         self.timer.tic('train')
 
-    def on_train_epoch_end(self, outputs) -> None:
+    def on_train_epoch_end(self, outputs=None) -> None:
         time = self.timer.toc('train')
         self.logger.experiment.add_scalar('train_time', time, self.current_epoch)
 
