@@ -2,7 +2,7 @@ seed: 9 # Initialization for the random number generator
 root_dir: exper_test # Root folder to save the model and TensorBoard data
 early_stopping: True
 trainer:
-  max_epochs: 500 # Maximum number of epochs to train
+  max_epochs: 30 # Maximum number of epochs to train
   min_epochs: 100 # Min number of epochs to train
   limit_train_batches: 1.0
   limit_val_batches: 1.0
@@ -10,7 +10,7 @@ trainer:
   check_val_every_n_epoch: 2
   progress_bar_refresh_rate: 1
   flush_logs_every_n_steps: 100
-  log_every_n_steps: 2 # How often to add logging rows (does not write to disk)
+  log_every_n_steps: 10 # How often to add logging rows (does not write to disk)
   precision: 32
   terminate_on_nan: True
   auto_select_gpus: True

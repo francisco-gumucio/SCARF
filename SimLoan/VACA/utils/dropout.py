@@ -102,7 +102,7 @@ def dropout_adj_parents(edge_index, edge_attr=None, p=0.5, prob_keep_self=0.0, f
         row, col, edge_attr = filter_adj(row, col, edge_attr, row < col)
 
     nodes = torch.tensor(list(range(N)))
-    mask_nodes = edge_index.new_full((N,), 1 - p, dtype=torch.float)
+    mask_nodes = edge_index.new_full((N,), 1 - p, dtype=torch.float).to(nodes.device)
     mask_nodes = torch.bernoulli(mask_nodes).to(torch.bool)
 
     nodes_to_be_dropped = nodes[~mask_nodes]

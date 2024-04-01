@@ -30,6 +30,7 @@ class HeterogeneousSCMDataModule(pl.LightningDataModule):
             batch_size: int = 32,
             lambda_: float = 0.05,
             equations_type: str = 'linear',
+            device = None,
             *args,
             **kwargs,
     ):
@@ -48,127 +49,9 @@ class HeterogeneousSCMDataModule(pl.LightningDataModule):
 
         self._shuffle_train = True
 
-        if dataset_name == Cte.LOAN:
-            from datasets.loan import LoanSCM
+        self.device=device
 
-            dataset_fn = LoanSCM
-
-        elif dataset_name == Cte.LOAN_AB_LAMOUNT:
-            from datasets.loan_ab_lamount import LoanSCM
-
-            dataset_fn = LoanSCM
-
-        elif dataset_name == Cte.LOAN_AB_LDURATION:
-            from datasets.loan_ab_lduration import LoanSCM
-
-            dataset_fn = LoanSCM
-
-        elif dataset_name == Cte.LOAN_AB_INCOME:
-            from datasets.loan_ab_income import LoanSCM
-
-            dataset_fn = LoanSCM
-
-        elif dataset_name == Cte.LOAN_AB_SAVINGS:
-            from datasets.loan_ab_savings import LoanSCM
-
-            dataset_fn = LoanSCM
-
-        elif dataset_name == Cte.LOAN_AB_LA_LD:
-            from datasets.loan_ab_la_ld import LoanSCM
-
-            dataset_fn = LoanSCM
-
-        elif dataset_name == Cte.LOAN_AB_LA_I:
-            from datasets.loan_ab_la_i import LoanSCM
-
-            dataset_fn = LoanSCM
-
-        elif dataset_name == Cte.LOAN_AB_LA_S:
-            from datasets.loan_ab_la_s import LoanSCM
-
-            dataset_fn = LoanSCM
-
-        elif dataset_name == Cte.LOAN_AB_LD_I:
-            from datasets.loan_ab_ld_i import LoanSCM
-
-            dataset_fn = LoanSCM
-
-        elif dataset_name == Cte.LOAN_AB_LD_S:
-            from datasets.loan_ab_ld_s import LoanSCM
-
-            dataset_fn = LoanSCM
-
-        elif dataset_name == Cte.LOAN_AB_I_S:
-            from datasets.loan_ab_i_s import LoanSCM
-
-            dataset_fn = LoanSCM
-
-        elif dataset_name == Cte.LOAN_AB_LA_LD_I:
-            from datasets.loan_ab_la_ld_i import LoanSCM
-
-            dataset_fn = LoanSCM
-
-        elif dataset_name == Cte.LOAN_AB_LA_LD_S:
-            from datasets.loan_ab_la_ld_s import LoanSCM
-
-            dataset_fn = LoanSCM
-
-        elif dataset_name == Cte.LOAN_AB_LA_I_S:
-            from datasets.loan_ab_la_i_s import LoanSCM
-
-            dataset_fn = LoanSCM
-
-        elif dataset_name == Cte.LOAN_AB_LD_I_S:
-            from datasets.loan_ab_ld_i_s import LoanSCM
-
-            dataset_fn = LoanSCM
-
-        elif dataset_name == Cte.LOAN_AB_LA_LD_I_S:
-            from datasets.loan_ab_la_ld_i_s import LoanSCM
-
-            dataset_fn = LoanSCM
-
-        elif dataset_name == Cte.ADULT:
-            from datasets.adult import AdultSCM
-
-            dataset_fn = AdultSCM
-
-        elif dataset_name == Cte.ADULT_AB_AGE:
-            from datasets.adult_ab_age import AdultSCM
-
-            dataset_fn = AdultSCM
-
-        elif dataset_name == Cte.ADULT_AB_EDU:
-            from datasets.adult_ab_edu import AdultSCM
-
-            dataset_fn = AdultSCM
-
-        elif dataset_name == Cte.ADULT_AB_HOURS:
-            from datasets.adult_ab_hours import AdultSCM
-
-            dataset_fn = AdultSCM
-
-        elif dataset_name == Cte.ADULT_AB_A_E:
-            from datasets.adult_ab_a_e import AdultSCM
-
-            dataset_fn = AdultSCM
-
-        elif dataset_name == Cte.ADULT_AB_A_H:
-            from datasets.adult_ab_a_h import AdultSCM
-
-            dataset_fn = AdultSCM
-
-        elif dataset_name == Cte.ADULT_AB_E_H:
-            from datasets.adult_ab_e_h import AdultSCM
-
-            dataset_fn = AdultSCM
-
-        elif dataset_name == Cte.ADULT_AB_A_E_H:
-            from datasets.adult_ab_a_e_h import AdultSCM
-
-            dataset_fn = AdultSCM
-
-        elif dataset_name == Cte.TOY:
+        if dataset_name == Cte.TOY:
             root_dir = './'
             from datasets.toy import ToySCM
 
@@ -176,19 +59,22 @@ class HeterogeneousSCMDataModule(pl.LightningDataModule):
                                            split='train',
                                            num_samples_tr=num_samples_tr,
                                            lambda_=lambda_,
-                                           transform=None
+                                           transform=None,
+                                           device=None
                                            )
             self.valid_dataset = ToySCM(root_dir=root_dir,
                                            split='valid',
                                            num_samples_tr=num_samples_tr,
                                            lambda_=lambda_,
-                                           transform=None
+                                           transform=None,
+                                           device = None
                                            )
             self.test_dataset = ToySCM(root_dir=root_dir,
                                           split='test',
                                           num_samples_tr=num_samples_tr,
                                           lambda_=lambda_,
-                                          transform=None
+                                          transform=None,
+                                          device = None
                                           )
         else:
             raise NotImplementedError
@@ -317,10 +203,12 @@ class HeterogeneousSCMDataModule(pl.LightningDataModule):
             self.train_dataset,
             batch_size=self.batch_size,
             shuffle=self._shuffle_train,
-            num_workers=self.num_workers,
+            num_workers=19,
             drop_last=True,
             pin_memory=True,
         )
+        
+        print("Train Dataloader implemented")
         return loader
 
     def val_dataloader(self):
@@ -330,19 +218,27 @@ class HeterogeneousSCMDataModule(pl.LightningDataModule):
             self.valid_dataset,
             batch_size=self.batch_size,
             shuffle=False,
-            num_workers=self.num_workers,
+            num_workers=19,
             drop_last=True,
             pin_memory=True,
         )
+        
+        print("Valid Dataloader implemented")
         return loader
 
     def test_dataloader(self):
         self.test_dataset.set_transform(self._default_transforms())
 
         loader = DataLoader(
-            self.test_dataset, batch_size=self.batch_size, shuffle=False, num_workers=self.num_workers, drop_last=True,
-            pin_memory=True
+            self.test_dataset,
+            batch_size=self.batch_size,
+            shuffle=False,
+            num_workers=19,
+            drop_last=True,
+            pin_memory=True,
         )
+        print("Test Dataloader implemented")
+
         return loader
 
     def _default_transforms(self):
