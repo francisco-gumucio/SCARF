@@ -59,22 +59,19 @@ class HeterogeneousSCMDataModule(pl.LightningDataModule):
                                            split='train',
                                            num_samples_tr=num_samples_tr,
                                            lambda_=lambda_,
-                                           transform=None,
-                                           device=None
+                                           transform=None
                                            )
             self.valid_dataset = ToySCM(root_dir=root_dir,
                                            split='valid',
                                            num_samples_tr=num_samples_tr,
                                            lambda_=lambda_,
-                                           transform=None,
-                                           device = None
+                                           transform=None
                                            )
             self.test_dataset = ToySCM(root_dir=root_dir,
                                           split='test',
                                           num_samples_tr=num_samples_tr,
                                           lambda_=lambda_,
-                                          transform=None,
-                                          device = None
+                                          transform=None
                                           )
         else:
             raise NotImplementedError
@@ -205,7 +202,7 @@ class HeterogeneousSCMDataModule(pl.LightningDataModule):
             shuffle=self._shuffle_train,
             num_workers=19,
             drop_last=True,
-            pin_memory=True,
+            pin_memory=True
         )
         
         print("Train Dataloader implemented")
@@ -220,7 +217,7 @@ class HeterogeneousSCMDataModule(pl.LightningDataModule):
             shuffle=False,
             num_workers=19,
             drop_last=True,
-            pin_memory=True,
+            pin_memory=True
         )
         
         print("Valid Dataloader implemented")
@@ -235,7 +232,7 @@ class HeterogeneousSCMDataModule(pl.LightningDataModule):
             shuffle=False,
             num_workers=19,
             drop_last=True,
-            pin_memory=True,
+            pin_memory=True
         )
         print("Test Dataloader implemented")
 

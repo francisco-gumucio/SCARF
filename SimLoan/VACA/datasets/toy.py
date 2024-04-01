@@ -4,7 +4,7 @@ from datasets._heterogeneous import HeterogeneousSCM
 from datasets._adjacency import Adjacency
 from utils.distributions import *
 import pandas as pd
-from torch_geometric.data import DataLoader
+from torch_geometric.loader import DataLoader
 from torch_geometric.utils import degree
 import torch
 
@@ -15,6 +15,7 @@ class ToySCM(HeterogeneousSCM):
                  num_samples_tr: int = 630,
                  lambda_: float = 0.05,
                  transform=None,
+                 device = None
                  ):
         
         assert split in ['train', 'valid', 'test']
@@ -23,6 +24,7 @@ class ToySCM(HeterogeneousSCM):
         self.name = 'toy'
         self.split = split
         self.num_samples_tr = num_samples_tr
+        self.device = device
 
         super().__init__(root_dir=root_dir,
                          transform=transform,
@@ -38,7 +40,7 @@ class ToySCM(HeterogeneousSCM):
                                     'x2': ['z2', 'y2'],
                                     'z2': ['y2']
                                     },
-                         lambda_=lambda_,
+                         lambda_=lambda_
                          )
 
     @property
@@ -46,11 +48,7 @@ class ToySCM(HeterogeneousSCM):
         likelihoods_tmp = []
 
         for i, lik_name in enumerate(self.nodes_list):  # Iterate over nodes
-            if self.nodes_list[i] in ['is_exciting', 'at_least_1_teacher_referred_donor', 'fully_funded',
-                                      'at_least_1_green_donation', 'great_chat',
-                                      'three_or_more_non_teacher_referred_donors',
-                                      'one_non_teacher_referred_donor_giving_100_plus',
-                                      'donation_from_thoughtful_donor']:
+            if self.nodes_list[i] in ['s', 'y1', 'y2']:
                 dim = 1
                 lik_name = 'b'
             else:
@@ -77,7 +75,7 @@ class ToySCM(HeterogeneousSCM):
         elif self.split == 'valid':
             self.X = X_vals[int(self.num_samples_tr*0.7):int(self.num_samples_tr*0.8)]
         elif self.split == 'test':
-            self.X = X_vals[int(self.num_samples_tr*0.8):self.num_samples_tr]
+            self.X = X_vals[int(self.num_samples_tr*0.8):]
         self.U = np.zeros([self.X.shape[0], 1])
 
 
