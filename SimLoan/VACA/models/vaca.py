@@ -301,7 +301,10 @@ class VACA(pl.LightningModule):
         self.my_evaluator.set_save_dir(save_dir if save_dir is not None else self.logger.save_dir, )
         self.my_evaluator.set_logger(self.logger)
         self.my_evaluator.set_current_epoch(100000)
-
+        for tensor in dataloader:
+            tensor.to(self.device)
+            print(tensor)
+            print(self.device)
         output = self.my_evaluator.evaluate(dataloader, name=name, plots=plots)
         return output
 
