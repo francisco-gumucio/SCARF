@@ -10,13 +10,14 @@ from utils import count_time, demographic_parity
 
 class Classifier(nn.Module):
 
-    def __init__(self, hiddens):
+    def __init__(self, hiddens, dropout_prob = 0.5):
         super().__init__()
 
         layers = []
         for in_dim, out_dim in zip(hiddens[:-1], hiddens[1:]):
             layers.append(nn.Linear(in_dim, out_dim))
             layers.append(nn.ReLU(inplace=True))
+            layers.append(nn.Dropout(p=dropout_prob))
         layers.pop()
         layers.append(nn.Sigmoid())
 
@@ -24,15 +25,22 @@ class Classifier(nn.Module):
         self.loss_fn = nn.BCELoss()
         self.optim = Adam(self.parameters())
 
+        self.dropout_prob = dropout_prob
+
     def get_params(self):
         params = []
         for param in self.parameters():
             params.append(param.detach().cpu().flatten().numpy())
         return np.hstack(params)
 
-    def forward(self, s_mb, x_mb):
-        sx_mb = torch.cat([s_mb, x_mb], dim=1)
-        return self.model(sx_mb)
+    def forward(self, s_mb, x_mb, num_samples = 10):
+        pred = []
+
+        for _ in range(num_samples):
+            sx_mb = torch.cat([s_mb, x_mb], dim=1)
+            output = self.model(sx_mb)
+            pred.append(output.unsqueeze(0))
+        return torch.mean(torch.cat(pred, dim=0), dim=0)
 
     def predict(self, s_mb, x_mb):
         probs = self(s_mb, x_mb)
