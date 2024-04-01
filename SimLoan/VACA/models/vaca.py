@@ -70,7 +70,7 @@ class VACA(pl.LightningModule):
         self.annealing_beta = annealing_beta
 
         if is_heterogeneous:
-            from models.vaca.hvaca_module import HVACAModule
+            from models.hvaca_module import HVACAModule
 
             self.model = HVACAModule(likelihoods_x=likelihood_x,
                                      h_dim_list_dec=h_dim_list_dec,  # Hidden layers in the generative network
@@ -260,7 +260,7 @@ class VACA(pl.LightningModule):
         self.my_evaluator.set_save_dir(self.logger.save_dir)
         self.my_evaluator.set_logger(self.logger)
         self.my_evaluator.set_current_epoch(self.current_epoch)
-        self.my_evaluator.complete_logs(data_loader=self.test_dataloader(), name='test', plots=False)
+        # self.my_evaluator.complete_logs(data_loader=self.test_dataloader(), name='test', plots=False)
 
         return
 
@@ -301,10 +301,6 @@ class VACA(pl.LightningModule):
         self.my_evaluator.set_save_dir(save_dir if save_dir is not None else self.logger.save_dir, )
         self.my_evaluator.set_logger(self.logger)
         self.my_evaluator.set_current_epoch(100000)
-        for tensor in dataloader:
-            tensor.to(self.device)
-            print(tensor)
-            print(self.device)
         output = self.my_evaluator.evaluate(dataloader, name=name, plots=plots)
         return output
 
