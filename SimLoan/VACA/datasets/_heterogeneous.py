@@ -242,6 +242,8 @@ class HeterogeneousSCM(torch.utils.data.Dataset):
             return ul.BernoulliLikelihood(dim, normalize=normalize)
         elif lik_str == 'c':
             return ul.CategoricalLikelihood(dim, normalize=normalize)
+        elif lik_str == 'n':
+            return ul.NormalLikelihood(dim, normalize=normalize)
         else:
             raise NotImplementedError
 

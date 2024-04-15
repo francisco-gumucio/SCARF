@@ -271,19 +271,18 @@ class HVACAModule(nn.Module):
     def forward(self, data, estimator, beta=1.0):
 
         x = data.x.clone()
-
         mask = None
 
         if estimator == 'elbo':
-
+            
             qz_x = self.encoder(x,
                                 data.edge_index,
                                 edge_attr=data.edge_attr,
                                 node_ids=data.node_ids)
             z = qz_x.rsample()
-
+            
             px_z = self.decoder(z, data.edge_index, edge_attr=data.edge_attr, node_ids=data.node_ids)
-
+            
             log_prob_x = px_z.log_prob(self.get_x_graph(data, 'x')).sum(1).mean()
             kl_z = torch.distributions.kl.kl_divergence(qz_x, self.z_prior_distr).view(data.num_graphs, -1).sum(
                 1).mean()

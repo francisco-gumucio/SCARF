@@ -6,7 +6,7 @@ class ToTensor:
     """Convert ndarrays in sample to Tensors."""
 
     def __call__(self, sample):
-        return torch.tensor(sample)
+        return sample.clone().detach()
 
     def __repr__(self):
         return self.__class__.__name__ + '()'

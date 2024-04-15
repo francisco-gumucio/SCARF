@@ -6,7 +6,9 @@ from utils.distributions import *
 import pandas as pd
 from torch_geometric.loader import DataLoader
 from torch_geometric.utils import degree
+from datasets.transforms import ToTensor
 import torch
+import math
 
 class ToySCM(HeterogeneousSCM):
 
@@ -15,7 +17,8 @@ class ToySCM(HeterogeneousSCM):
                  num_samples_tr: int = 630,
                  lambda_: float = 0.05,
                  transform=None,
-                 device = None
+                 device = None,
+                 model = None,
                  ):
         
         assert split in ['train', 'valid', 'test']
@@ -25,12 +28,35 @@ class ToySCM(HeterogeneousSCM):
         self.split = split
         self.num_samples_tr = num_samples_tr
         self.device = device
+        self.model = model
+
+        structural_eq = {
+        's': lambda u,: u,
+        'x1': lambda s,: np.sin(s),
+        'z1': lambda s, x1,: np.cos(x1) + np.sin(s),
+        'y1': lambda x1, z1,:torch.bernoulli(torch.from_numpy(1/(1+ np.exp(-x1 + z1)))),
+        'x2': lambda s, x1, y1, z1,: np.sin(s) + 0.1*(x1-int(y1)),
+        'z2': lambda s, x2, x1, y1, z1,: np.cos(x2) + np.sin(s) + 0.1*(z1-int(y1)),
+        'y2': lambda x2, z2,: torch.bernoulli(torch.from_numpy(1/(1+ np.exp(-x2 + z2))))
+    }
+
+        noises_distr = {
+            's': Normal(0,0),
+            'x1': Normal(0,1),
+            'z1': Normal(0,1),
+            'y1': Normal(0,0),
+            'x2': Normal(0,1),
+            'z2': Normal(0,1),
+            'y2': Normal(0,0)
+        }
+
+        self.categorical_nodes = []
 
         super().__init__(root_dir=root_dir,
                          transform=transform,
                          nodes_to_intervene=['x1'],
-                         structural_eq=None,
-                         noises_distr=None,
+                         structural_eq=structural_eq,
+                         noises_distr=noises_distr,
                          nodes_list=['s', 'x1', 'z1', 'y1',
                                      'x2', 'z2', 'y2'],
                          adj_edges={'s': ['x1', 'z1', 'x2', 'z2'],
@@ -53,7 +79,7 @@ class ToySCM(HeterogeneousSCM):
                 lik_name = 'b'
             else:
                 dim = 1
-                lik_name = 'd'
+                lik_name = 'n'
             likelihoods_tmp.append([self._get_lik(lik_name,
                                                   dim=dim,
                                                   normalize='dim')])
@@ -67,6 +93,7 @@ class ToySCM(HeterogeneousSCM):
             edge_num += len(self.adj_edges[key])
 
         return edge_num + self.num_nodes
+        
 
     def _create_data(self):
         X_vals = self.df.values
@@ -76,7 +103,7 @@ class ToySCM(HeterogeneousSCM):
             self.X = X_vals[int(self.num_samples_tr*0.7):int(self.num_samples_tr*0.8)]
         elif self.split == 'test':
             self.X = X_vals[int(self.num_samples_tr*0.8):]
-        self.U = np.zeros([self.X.shape[0], 1])
+        self.U = np.zeros([self.X.shape[0], self.X.shape[1]])
 
 
     def set_transform(self, transform):
@@ -135,4 +162,44 @@ class ToySCM(HeterogeneousSCM):
             edges += len(self.adj_edges[key])
         edges += self.num_nodes
         return edges
+    
+    def get_attributes_dict(self):
+        attributes_dict = {
+        'fair_attributes': ['s'],
+        'unfair attributes': ['x1', 'z1', 'y1', 'x2', 'z2', 'y2'],
+        'immutable_attributes': ['s'],
+        'mutable attributes': ['x1', 'z1', 'y1', 'x2', 'z2', 'y2']
+        }
+        return attributes_dict
+    
+    def sample_obs(self, obs_id, parents_dict=None, n_samples=1, u=None):
+        '''
+        Only possible if the true Structural Eauations are known
+        f = self.structural_eq[f'x{obs_id}']
+        if u is None:
+            u = np.array(self.noises_distr[f'u{obs_id}'].sample(n_samples))
+
+        if not isinstance(parents_dict, dict):
+            return f(u), u
+        else:
+            return f(u, **parents_dict), u
+        '''
+        assert obs_id < len(self.nodes_list)
+        node_name = self.nodes_list[obs_id]
+        lik = self.likelihoods[obs_id][0]
+        f = self.structural_eq[node_name]
+        u_is_none = u is None
+        if u_is_none:
+            u = self._sample_noise(node_name, n_samples)
+        x = f(u, **parents_dict) if isinstance(parents_dict, dict) else f(u)
+        x = x.astype(np.float32)
+        if node_name in self.categorical_nodes:
+            x_out = np.zeros([x.shape[0], lik.domain_size])
+            x = x.astype(np.int32)
+            for i in range(x.shape[0]):
+                x_out[i, x[i, 0]] = 1
+
+            x = x_out.copy().astype(np.float32)
+        return x, u
+
 

@@ -281,6 +281,7 @@ class VACA(pl.LightningModule):
 
         metrics = {'elbo': [], f'iwae_{K}': []}
         for idx, batch in enumerate(iter(data_loader)):
+            batch = batch.to(self.device)
             objective, data = self.model(batch, estimator='elbo', beta=1)
             metrics['elbo'].append(objective.item())
             log_w = self.compute_log_w(batch, K=K)
