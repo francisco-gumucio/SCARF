@@ -34,10 +34,10 @@ class ToySCM(HeterogeneousSCM):
         's': lambda u,: u,
         'x1': lambda s,: np.sin(s),
         'z1': lambda s, x1,: np.cos(x1) + np.sin(s),
-        'y1': lambda x1, z1,:torch.bernoulli(torch.from_numpy(1/(1+ np.exp(-x1 + z1)))),
-        'x2': lambda s, x1, y1, z1,: np.sin(s) + 0.1*(x1-int(y1)),
-        'z2': lambda s, x2, x1, y1, z1,: np.cos(x2) + np.sin(s) + 0.1*(z1-int(y1)),
-        'y2': lambda x2, z2,: torch.bernoulli(torch.from_numpy(1/(1+ np.exp(-x2 + z2))))
+        'y1': lambda x1, z1,:torch.bernoulli(torch.from_numpy(np.array(1/(1+ np.exp(-x1 + z1))))),
+        'x2': lambda s, x1, y1,: np.sin(s) + 0.1*(x1-int(y1)),
+        'z2': lambda s, x2, y1, z1,: np.cos(x2) + np.sin(s) + 0.1*(z1-int(y1)),
+        'y2': lambda x2, z2,: torch.bernoulli(torch.from_numpy(np.array(1/(1+ np.exp(-np.array(x2) + np.array(z2))))))
     }
 
         noises_distr = {
