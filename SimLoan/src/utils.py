@@ -8,15 +8,16 @@ from time import time
 from functools import wraps
 from sklearn.manifold import TSNE
 from sklearn.decomposition import PCA
-from geomloss import SamplesLoss
+# from geomloss import SamplesLoss
+import os
 
 
-def data_distance(s_train, x_train):
-    wloss = SamplesLoss("sinkhorn", p=1, blur=0.01)
-    data0 = torch.FloatTensor(x_train[s_train[:, 0] == 0])[:5000]
-    data1 = torch.FloatTensor(x_train[s_train[:, 0] == 1])[:5000]
+#def data_distance(s_train, x_train):
+#    wloss = SamplesLoss("sinkhorn", p=1, blur=0.01)
+#    data0 = torch.FloatTensor(x_train[s_train[:, 0] == 0])[:5000]
+#    data1 = torch.FloatTensor(x_train[s_train[:, 0] == 1])[:5000]
 #     print(data0.shape, data1.shape)
-    print(f"X0-X1-W-dis:", wloss(data0, data1))
+#    print(f"X0-X1-W-dis:", wloss(data0, data1))
     
 
 def tensor(x):
@@ -290,3 +291,51 @@ def generate_data(s_train, x_train):
     print(f"S0-W-dis: {wloss(data0, data00)}")
     print(f"S1-W-dis: {wloss(data1, data11)}")
     print(f"S0-S1-W-diss: {wloss(data0, data1)}")
+
+def pairs_csv(gen_train_s, gen_train_x, gen_train_y, gen_valid_s, gen_valid_x, gen_valid_y, gen_test_s, gen_test_x, gen_test_y):
+    pairs = np.empty((0, 7))
+
+    for i in range(gen_train_x.shape[0]):
+        temp_pair = np.empty((1, 5 + 2*(gen_train_x.shape[2] - 1)))
+        temp_pair[0, 0] = gen_train_s[i][0]
+        for j in range(gen_train_x.shape[1] - 1):
+            for k in range(gen_train_x[0][0].shape[0]):
+                temp_pair[0, 1+k] = gen_train_x[i, j, k]
+            temp_pair[0, 1+gen_train_x.shape[2]] = gen_train_y[i, j][0]
+            for k in range(gen_train_x[0][0].shape[0]):
+                temp_pair[0, 2 + gen_train_x.shape[2] + k] = gen_train_x[i, j+1, k]
+            temp_pair[0, 5 + 2*(gen_train_x.shape[2] - 1) - 1] = gen_train_y[i, j+1][0]
+            pairs = np.vstack([pairs, temp_pair])
+
+    for i in range(gen_valid_x.shape[0]):
+        temp_pair = np.empty((1, 5 + 2*(gen_valid_x.shape[2] - 1)))
+        temp_pair[0, 0] = gen_valid_s[i][0]
+        for j in range(gen_valid_x.shape[1] - 1):
+            for k in range(gen_valid_x[0][0].shape[0]):
+                temp_pair[0, 1+k] = gen_valid_x[i, j, k]
+            temp_pair[0, 1+gen_valid_x.shape[2]] = gen_valid_y[i, j][0]
+            for k in range(gen_valid_x[0][0].shape[0]):
+                temp_pair[0, 2 + gen_valid_x.shape[2] + k] = gen_valid_x[i, j+1, k]
+            temp_pair[0, 5 + 2*(gen_valid_x.shape[2] - 1) - 1] = gen_valid_y[i, j+1][0]
+            pairs = np.vstack([pairs, temp_pair])
+
+    for i in range(gen_test_x.shape[0]):
+        temp_pair = np.empty((1, 5 + 2*(gen_test_x.shape[2] - 1)))
+        temp_pair[0, 0] = gen_test_s[i][0]
+        for j in range(gen_test_x.shape[1] - 1):
+            for k in range(gen_test_x[0][0].shape[0]):
+                temp_pair[0, 1+k] = gen_test_x[i, j, k]
+            temp_pair[0, 1+gen_test_x.shape[2]] = gen_test_y[i, j][0]
+            for k in range(gen_test_x[0][0].shape[0]):
+                temp_pair[0, 2 + gen_test_x.shape[2] + k] = gen_test_x[i, j+1, k]
+            temp_pair[0, 5 + 2*(gen_test_x.shape[2] - 1) - 1] = gen_test_y[i, j+1][0]
+            pairs = np.vstack([pairs, temp_pair])
+
+    path = os.getcwd()
+    path = os.path.join(path, "VACA", 'pairs.csv')
+    os.makedirs(path, exist_ok=True)
+    df = pd.DataFrame(pairs)
+    df = df.set_axis(['s', 'x1', 'z1', 'y1', 'x2', 'z2', 'y2'], axis=1)
+    df.to_csv(path)  
+
+    return pairs

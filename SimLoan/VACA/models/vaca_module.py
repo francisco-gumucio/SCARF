@@ -263,7 +263,6 @@ class VACAModule(nn.Module):
         # [K, N]
         return log_w.T, zs
 
-    @torch.no_grad()
     def sample(self, adj, Z=None, n_samples=None):
         if (Z is None) == (n_samples is None):
             raise ValueError("Either `Z` or `n_samples` must be specified, but not both.")
@@ -312,7 +311,7 @@ class VACAModule(nn.Module):
         else:
             raise NotImplementedError
 
-    @torch.no_grad()
+
     def reconstruct(self, data,
                     use_mean_encoder=True,
                     return_type='mean'):

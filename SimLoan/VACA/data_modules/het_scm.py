@@ -73,6 +73,41 @@ class HeterogeneousSCMDataModule(pl.LightningDataModule):
                                           lambda_=lambda_,
                                           transform=None
                                           )
+            self.total_dataset = ToySCM(root_dir=root_dir,
+                                          split='total',
+                                          num_samples_tr=num_samples_tr,
+                                          lambda_=lambda_,
+                                          transform=None
+                                          )
+            
+        elif dataset_name == Cte.TAIWAN:
+            root_dir = './'
+            from datasets.taiwan import TaiwanSCM
+
+            self.train_dataset = TaiwanSCM(root_dir=root_dir,
+                                           split='train',
+                                           num_samples_tr=num_samples_tr,
+                                           lambda_=lambda_,
+                                           transform=None
+                                           )
+            self.valid_dataset = TaiwanSCM(root_dir=root_dir,
+                                           split='valid',
+                                           num_samples_tr=num_samples_tr,
+                                           lambda_=lambda_,
+                                           transform=None
+                                           )
+            self.test_dataset = TaiwanSCM(root_dir=root_dir,
+                                          split='test',
+                                          num_samples_tr=num_samples_tr,
+                                          lambda_=lambda_,
+                                          transform=None
+                                          )
+            self.total_dataset = TaiwanSCM(root_dir=root_dir,
+                                          split='total',
+                                          num_samples_tr=num_samples_tr,
+                                          lambda_=lambda_,
+                                          transform=None
+                                          )
         else:
             raise NotImplementedError
 
@@ -86,7 +121,7 @@ class HeterogeneousSCMDataModule(pl.LightningDataModule):
 
             self.train_dataset = dataset_fn(root_dir=root_dir,
                                             split='train',
-                                            num_samples=num_samples_tr,
+                                            num_samples=int(0.7 * num_samples_tr),
                                             equations_type=equations_type,
                                             likelihood_names=likelihood_names,
                                             lambda_=lambda_,
@@ -94,7 +129,7 @@ class HeterogeneousSCMDataModule(pl.LightningDataModule):
 
             self.valid_dataset = dataset_fn(root_dir=root_dir,
                                             split='valid',
-                                            num_samples=int(0.5 * num_samples_tr),
+                                            num_samples=int(0.2 * num_samples_tr),
                                             equations_type=equations_type,
                                             likelihood_names=likelihood_names,
                                             lambda_=lambda_,
@@ -102,11 +137,20 @@ class HeterogeneousSCMDataModule(pl.LightningDataModule):
 
             self.test_dataset = dataset_fn(root_dir=root_dir,
                                            split='test',
-                                           num_samples=int(0.5 * num_samples_tr),
+                                           num_samples=int(0.1 * num_samples_tr),
                                            equations_type=equations_type,
                                            likelihood_names=likelihood_names,
                                            lambda_=lambda_,
                                            transform=None)
+            
+            self.total_dataset = dataset_fn(root_dir=root_dir,
+                                             split='total',
+                                             num_samples=num_samples_tr,
+                                             equations_type=equations_type,
+                                             likelihood_names=likelihood_names,
+                                             lambda_=lambda_,
+                                             transform=None)
+            
 
     @property
     def likelihood_list(self):
@@ -180,6 +224,7 @@ class HeterogeneousSCMDataModule(pl.LightningDataModule):
         self.train_dataset.prepare_data(normalize_A=self.normalize_A, add_self_loop=True)
         self.valid_dataset.prepare_data(normalize_A=self.normalize_A, add_self_loop=True)
         self.test_dataset.prepare_data(normalize_A=self.normalize_A, add_self_loop=True)
+        self.total_dataset.prepare_data(normalize_A=self.normalize_A, add_self_loop=True)
         if self.normalize == 'std':
             self.scaler = MaskedTensorStandardScaler(list_dim_to_scale_x0=self.train_dataset.get_dim_to_scale_x0(),
                                                      list_dim_to_scale=self.train_dataset.get_dim_to_scale(),
@@ -205,7 +250,6 @@ class HeterogeneousSCMDataModule(pl.LightningDataModule):
             pin_memory=False
         )
         
-        print("Train Dataloader implemented")
         return loader
 
     def val_dataloader(self):
@@ -219,8 +263,7 @@ class HeterogeneousSCMDataModule(pl.LightningDataModule):
             drop_last=True,
             pin_memory=False
         )
-        
-        print("Valid Dataloader implemented")
+    
         return loader
 
     def test_dataloader(self):
@@ -234,7 +277,20 @@ class HeterogeneousSCMDataModule(pl.LightningDataModule):
             drop_last=True,
             pin_memory=False
         )
-        print("Test Dataloader implemented")
+
+        return loader
+    
+    def total_dataloader(self):
+        self.total_dataset.set_transform(self._default_transforms())
+
+        loader = DataLoader(
+            self.total_dataset,
+            batch_size=self.batch_size,
+            shuffle=False,
+            num_workers=19,
+            drop_last=True,
+            pin_memory=False
+        )
 
         return loader
 

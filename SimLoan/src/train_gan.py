@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 from torch.optim import Adam, RMSprop
 from torch.utils.data import DataLoader, TensorDataset
-from src.utils import count_time, tensor
+from utils import count_time, tensor
 
 
 def train_discriminator(clf, G, D, optim, loss_fn, xs, zs, ss):

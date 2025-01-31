@@ -135,7 +135,6 @@ class VACA(pl.LightningModule):
     def set_random_train_sampler(self, sampler):
         self.random_train_sampler = sampler
 
-    @torch.no_grad()
     def samples_aggregated_posterior(self, num_samples):
         batch = self.random_train_sampler(num_samples)
         q_z_x = self.model.encoder(batch.x, batch.edge_index, edge_attr=batch.edge_attr,
@@ -271,7 +270,6 @@ class VACA(pl.LightningModule):
         img_folder = mkdir(os.path.join(self.logger.save_dir, 'images'))
         self.model.set_z_prior_distr(self.device)  # Just to move the prior to GPU if needed
 
-    @torch.no_grad()
     def get_objective_metrics(self,
                               data_loader,
                               name):
@@ -293,7 +291,6 @@ class VACA(pl.LightningModule):
 
         return output
 
-    @torch.no_grad()
     def evaluate(self,
                  dataloader,
                  name='test',
@@ -322,7 +319,6 @@ class VACA(pl.LightningModule):
     def compute_log_w_dreg(self, data, K):
         return self.model.compute_log_w_dreg(data, K=K)
 
-    @torch.no_grad()
     def get_observational_distr(self, data_loader,
                                 use_links: bool = True,
                                 use_aggregated_posterior: bool = False,
@@ -379,7 +375,6 @@ class VACA(pl.LightningModule):
 
         return torch.cat(z_list), torch.cat(x), torch.cat(x_real)
 
-    @torch.no_grad()
     def get_intervention(self, batch,
                          x_I,
                          nodes_list,
@@ -433,7 +428,6 @@ class VACA(pl.LightningModule):
 
         return x_hat, z
 
-    @torch.no_grad()
     def get_interventional_distr(self, data_loader,
                                  x_I: Dict[str, float],
                                  use_aggregated_posterior: bool = False,
@@ -508,7 +502,7 @@ class VACA(pl.LightningModule):
 
         return x_gener_dict_out, x_real_dict_out
 
-    @torch.no_grad()
+
     def compute_counterfactual(self, batch, x_I, nodes_list, normalize,
                                return_type='sample'):
         z_factual, _ = self.model.encoder(batch.x, batch.edge_index, edge_attr=batch.edge_attr,
@@ -546,7 +540,7 @@ class VACA(pl.LightningModule):
 
         return x_CF, z_factual, z_cf_I, z_dec
 
-    @torch.no_grad()
+
     def get_counterfactual_distr(self, data_loader,
                                  x_I=None,
                                  is_noise=False,
@@ -629,7 +623,6 @@ class VACA(pl.LightningModule):
         else:
             return x_gener_dict_out, x_real_dict_out, x_factual_dict_out
 
-    @torch.no_grad()
     def get_x(self, data_loader):
         iterator = iter(data_loader)
         self.eval()
@@ -638,7 +631,6 @@ class VACA(pl.LightningModule):
             x.append(self.get_x_graph(batch, 'x'))
         return torch.cat(x)
 
-    @torch.no_grad()
     def get_reconstruction_distr(self, data_loader,
                                  num_batches=None,
                                  normalize=True):
@@ -679,7 +671,6 @@ class VACA(pl.LightningModule):
 
         return torch.cat(z), torch.cat(x), torch.cat(x_real)
 
-    @torch.no_grad()
     def get_obs_distribution(self, data_loader):
         iterator = iter(data_loader)
         self.eval()

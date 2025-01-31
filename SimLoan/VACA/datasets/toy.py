@@ -21,9 +21,9 @@ class ToySCM(HeterogeneousSCM):
                  model = None,
                  ):
         
-        assert split in ['train', 'valid', 'test']
+        assert split in ['train', 'valid', 'test', 'total']
 
-        self.df = pd.read_csv('pairs.csv', header=0, index_col=0)
+        self.df = pd.read_csv('steps.csv', header=0, index_col=0)
         self.name = 'toy'
         self.split = split
         self.num_samples_tr = num_samples_tr
@@ -39,6 +39,7 @@ class ToySCM(HeterogeneousSCM):
         'z2': lambda s, x2, y1, z1,: np.cos(x2) + np.sin(s) + 0.1*(z1-int(y1)),
         'y2': lambda x2, z2,: torch.bernoulli(torch.from_numpy(np.array(1/(1+ np.exp(-np.array(x2) + np.array(z2))))))
     }
+    
 
         noises_distr = {
             's': Normal(0,0),
@@ -54,7 +55,7 @@ class ToySCM(HeterogeneousSCM):
 
         super().__init__(root_dir=root_dir,
                          transform=transform,
-                         nodes_to_intervene=['x1'],
+                         nodes_to_intervene=['x2', 'z2'],
                          structural_eq=structural_eq,
                          noises_distr=noises_distr,
                          nodes_list=['s', 'x1', 'z1', 'y1',
@@ -103,6 +104,8 @@ class ToySCM(HeterogeneousSCM):
             self.X = X_vals[int(self.num_samples_tr*0.7):int(self.num_samples_tr*0.8)]
         elif self.split == 'test':
             self.X = X_vals[int(self.num_samples_tr*0.8):]
+        elif self.split == 'total':
+            self.X = X_vals
         self.U = np.zeros([self.X.shape[0], self.X.shape[1]])
 
 

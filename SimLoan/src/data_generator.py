@@ -8,7 +8,7 @@ from pathlib import Path
 from sklearn.datasets import make_classification
 from sklearn.cluster import KMeans
 
-from src.utils import count_time
+from utils import count_time
 
 
 def to_tensor(s, x, y=None):
@@ -177,3 +177,47 @@ def generate_sequential_datasets(no, dim, seq_len, hiddens, epsilon, device, pat
     x = np.transpose(np.array(x, dtype=np.float32), axes=(1, 0, 2))
     y = np.transpose(np.array(y, dtype=np.int32), axes=(1, 0, 2))
     return s0, x, y, model
+
+
+def gen_initial_data(n, noise_factor = 1, seed = 0):
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    s0 = torch.bernoulli(torch.empty(n,1).uniform_(0,1)).numpy()
+    x0 = np.random.randn(n, 1)*noise_factor + np.sin(s0)
+    z0 = np.cos(x0) + np.random.randn(n, 1)*noise_factor + np.sin(s0)
+    y = torch.bernoulli(torch.from_numpy(1 /(1+  np.exp(-x0-z0+1.7))))
+    return torch.from_numpy(s0), to_tensor(x0, z0), y
+
+def sequential_data(s0, x0, y0, seq_len, hiddens, l, noise_factor = 1, seed=0):
+    n = s0.size()[0]
+    model = TrueModel(hiddens, seed)
+    sx = to_tensor(s0, x0)
+    sx.requires_grad = True
+    sx = sx.to(dtype=torch.float32)
+    prob = model(sx)
+    loss = nn.BCELoss()(prob, torch.ones_like(prob))
+    loss.backward()
+    x = x0
+    y= y0
+    prevx = x.numpy()
+    prevy = y
+    s0 = s0.numpy()
+    nx = np.empty_like(s0)
+    nz = np.empty_like(s0)
+    ny = np.empty_like(s0)
+    for i in range(1, seq_len):
+        loss = nn.BCELoss()(prob, torch.ones_like(prob))
+        delta_y = prevy*loss
+        for j in range(n):
+            nx[j] = np.random.randn()*noise_factor + np.sin(s0[j]) + l*(prevx[j][0] - prevy[j].item())
+            nz[j] = np.cos(nx[j]) + np.random.randn()*noise_factor + np.sin(s0[j])  + l*(prevx[j][1] - prevy[j].item())
+        ny = torch.bernoulli(torch.from_numpy(1 /(1+  np.exp(-nx-nz+1.7))))
+        prevx = to_tensor(nx, nz)
+        x = torch.cat((x, prevx),0)
+        y = torch.cat((y, ny),0)
+        prevx = prevx.numpy()
+        prevy = ny
+    # x = np.array(x, dtype=np.float32).reshape((n, seq_len, 2))
+    #y = np.array(y, dtype=np.int32).reshape(n, seq_len, 1)
+    return x, y
+        
