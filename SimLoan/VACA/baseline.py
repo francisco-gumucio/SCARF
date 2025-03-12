@@ -114,7 +114,7 @@ def PGD_effort(model, x, improvable_indices, iter, lr, delta):
 
     return Yhat, efforts
 
-def trainer_fb_fair(model, train_loader, improvable_indices, optimizer, device, n_epochs, lambda_, delta_effort = 1, effort_iter = 20, effort_lr = 1):
+def trainer_fb_fair(model, train_loader, improvable_indices, optimizer, device, n_epochs, lambda_, delta_effort = 1, effort_iter = 10, effort_lr = 0.1):
     loss_func = torch.nn.BCELoss(reduction = 'mean')
 
     p_losses = []
@@ -192,6 +192,8 @@ def test_fb_fair(model, test_loader, improvable_indices, device, delta_effort = 
         y = y.to(device)
         s = x[:, 0]
         yhat = model.predict(s, x)
+        neg_indices = yhat.squeeze() < 0.5
+        pos_indices = yhat.squeeze() >= 0.5
 
         x_neg = x[yhat.squeeze() < 0.5].to(device)
         x_pos = x[yhat.squeeze() >= 0.5].to(device)
