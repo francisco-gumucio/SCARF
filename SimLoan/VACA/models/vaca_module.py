@@ -177,7 +177,7 @@ class VACAModule(nn.Module):
             return mean, px_z
         elif return_type == 'sample':
             mean, px_z = self.likelihood_x(logits, return_mean=True)
-            return px_z.sample(), px_z
+            return px_z.rsample(), px_z
         else:
             px_z = self.likelihood_x(logits)
             return px_z
