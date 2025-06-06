@@ -46,10 +46,11 @@ jupyter notebook
 
 ### Table 1: Results on Synthetic Dataset
 
-| Method | Accuracy | Long-Term Fairness | Short-Term Fairness | Runtime (s) |
-|--------|----------|----------|-------------|
-| SCARF (Ours) | 0.86095 | 0.06273 | 0.0714 | ~1hr |
-| Equal Improvability | 0.83999 | 0.06718595 | 0.36873019 | ~0.75hrs |
+| Method               | Accuracy | Long-Term Fairness | Short-Term Fairness | Runtime    |
+|----------------------|----------|--------------------|----------------------|------------|
+| SCARF (Ours)         | 0.86095  | 0.06273            | 0.0714               | ~1hr       |
+| Equal Improvability  | 0.83999  | 0.06719            | 0.36873              | ~0.75hrs   |
+
 
 **Reproduce with:**
 ```bash
@@ -170,9 +171,9 @@ Each notebook is structured with clear sections. You can run individual sections
 
 | Notebook | Dataset Size | Runtime Breakdown | Total Runtime |
 |----------|--------------|-------------------|---------------|
-| `toy_data_gen.ipynb` | 200 samples over 30 seeds | Training: ~2-3 hrs<br>Testing: ~30 min<br>Evaluation: ~30 min | **~3-4 hours** |
-| `taiwan_data_gen.ipynb` | 200 samples over 30 seeds | Training: ~2-3 hrs<br>Testing: ~30 min<br>Evaluation: ~30 min | **~3-4 hours** |
-| **Total** | - | **Complete reproduction** | **~6-8 hours** |
+| `toy_data_gen.ipynb` | 700 samples for training, 125 samples for validation, 200 samples tested over 30 seeds | Training: ~2-3 hrs<br>Testing: ~30 min<br>Evaluation: ~30 min | **~3-4 hours** |
+| `taiwan_data_gen.ipynb` | 700 samples for training, 125 samples for validation, 200 samples tested over 30 seeds | Training: ~2-3 hrs<br>Testing: ~30 min<br>Evaluation: ~30 min | **~3-4 hours** |
+| **Total** | 1,400 samples for training, 250 samples for validation, 400 samples tested over 30 seeds | **Complete reproduction** | **~6-8 hours** |
 
 **What's included in runtime:**
 - **Training**: SCARF model + all baseline methods + ablation variants
